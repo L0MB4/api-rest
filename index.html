@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RICERCA E TESTING API</title>
+    <!-- Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* root colori (GESTIONE CSS E HTML LOMBARDI) */
+        :root {
+            --gh-canvas: #040405;       
+            --gh-bg: #090b0f;           
+            --gh-header: #010102;       
+            --gh-border: #21262d;       
+            --gh-border-muted: #161b22;
+            --gh-text: #e6edf3;        
+            --gh-text-white: #ffffff;   
+            --gh-text-muted: #8b949e;   
+            --gh-accent: #2f81f7;       
+            --gh-accent-muted: rgba(47, 129, 247, 0.15);
+            
+  
+            /*Colori simili a google wather: ispirazione*/
+            --google-sunny: linear-gradient(135deg, #154575 0%, #1e5799 50%, #2975cd 100%);
+            --google-cloudy: linear-gradient(135deg, #1c2128 0%, #2d333b 60%, #3a424a 100%);
+            --google-rainy: linear-gradient(135deg, #0b0f14 0%, #161c24 50%, #222a36 100%);
+            
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+        }
+        ::selection {
+            background-color: rgba(0,0,0,0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--gh-canvas);
+            color: var(--gh-text);
+            font-family: var(--font-stack);
+            font-size: 16px;
+            line-height: 1.6;
+            cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: rgba(1, 1, 2, 0.7) !important;
+            border-bottom: 1px solid var(--gh-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            height: 60px; /* Fissiamo l'altezza totale della navbar */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .nav-container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            height: 100%;
+            
+            /* Usiamo Grid per separare logo e link */
+            display: grid;
+            grid-template-columns: auto 1fr;
+            /* Allineamento verticale forzato al centro */
+            align-items: center; 
+        }
+
+        .nav-logo {
+            color: var(--gh-text-white);
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1;
+        }
+
+        .nav-logo i {
+            color: var(--gh-accent);
+            height: 1.1rem; 
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            justify-content: flex-end; 
+            align-items: baseline; 
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: var(--gh-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1;
+            padding: 7px 0; 
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--gh-text-white);
+            border-bottom: 2px solid var(--gh-accent);
+        }
+        
+        /*BANNER INIZIALE*/
+        .hero {
+            background: linear-gradient(to top left, var(--gh-border), var(--gh-header));
+            border-bottom: 1px solid var(--gh-border);
+            padding: 4rem 1.5rem;
+            position: relative;
+            overflow: hidden;   /*X BRESSI: non toccare OVERFLOW altrimenti il razzo sfora dal box*/
+            display: flex;
+            align-items: center;
+        }
+
+        .hero .container-hero {
+            display: flex;
+            flex-direction: column;
+            max-width: 1040px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            z-index: 2; 
+        }
+
+        .hero h1 {
+            color: var(--gh-text-white);
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            max-width: 60%; 
+            padding: 0;
+        }
+
+        .hero p {
+            color: var(--gh-text-muted);
+            font-size: 1.1rem;
+            max-width: 60%;
+            margin: 0;
+        }
+
+        /* Icona Rocket: stile incollato da lucid icons*/
+        .hero-rocket-icon {
+            position: absolute;
+            right: -50px;       /* Spinge l'icona verso l'esterno a destra per tagliarla */
+            bottom: -60px;      /* Spinge l'icona verso il basso per tagliarla sul fondo */
+            width: 350px;       /* Dimensione decisamente grande */
+            height: 350px;
+            color: rgba(83, 83, 83, 0.3); /* Colore blu avio semi-trasparente stile watermark */
+            transform: rotate(-15deg);       /* Inclinazione dinamica del razzo */
+            pointer-events: none;            /* Impedisce l'interazione con il mouse */
+            z-index: 1;
+        }
+
+        /* CONTENITORE CENTRALE */
+        .container {
+            max-width: 1040px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* SEZIONI E CARD */
+        section {
+            background: linear-gradient(to right, #13131c, var(--gh-header));
+            border: 1px solid var(--gh-border);
+            border-radius: 8px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        section h2 {
+            color: var(--gh-text-white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.75rem;
+            border-bottom: 1px solid var(--gh-border);
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        section h2 i {
+            color: var(--gh-accent);
+        }
+
+        h3 {
+            color: var(--gh-text-white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-divider {
+            height: 1px;
+            background-color: var(--gh-border-muted);
+            margin: 2rem 0;
+            border: none;
+        }
+
+        p {
+            color: var(--gh-text);
+            margin-bottom: 1.25rem;
+            font-size: 11pt;
+            text-align: justify;
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--gh-text);
+        }
+
+        li {
+            margin-bottom: 0.6rem;
+            font-size: 11pt;
+        }
+
+        strong {
+            color: var(--gh-text-white);
+        }
+
+        /* TABELLE STRUTTURATE */
+        .table-wrapper {
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1.75rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5pt;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--gh-header);
+            color: var(--gh-text-white);
+            font-weight: 600;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gh-border);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gh-border-muted);
+            color: var(--gh-text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* BLOCCHI DI CODICE */
+        pre {
+            background-color: #010102;
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 10pt;
+            color: #e6edf3;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background-color: rgba(110, 118, 129, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 9.5pt;
+            color: var(--gh-text-white);
+        }
+
+        /* WIDGET METEO */
+        .weather-section-container {
+            padding: 1rem 0;
+        }
+
+        .weather-card {
+            background: var(--google-sunny); 
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            padding: 2.2rem;
+            max-width: 480px;
+            margin: 0 auto;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            transition: background 0.4s ease;
+        }
+
+        .weather-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .weather-search input {
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .weather-search input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .weather-search input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .weather-search button {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.4rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+
+        .weather-search button:hover {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Contenuto principale del widget */
+        .weather-main-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .city-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .weather-condition {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            text-transform: capitalize;
+            margin-top: 0.2rem;
+        }
+
+        .current-temp {
+            font-size: 3.8rem;
+            font-weight: 300;
+            line-height: 1.1;
+            margin-top: 0.5rem;
+        }
+
+        /* Scatola Icona Piena Vettoriale */
+        .google-icon-box {
+            width: 96px;
+            height: 96px;
+        }
+
+        .google-icon-box svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .temp-extremes {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            font-size: 1rem;
+        }
+
+        .temp-extremes span {
+            margin-right: 1.5rem;
+        }
+
+        /* Box informativo di stato */
+        .weather-info-status {
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* FOOTER COERENTE */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gh-text-muted);
+            border-top: 1px solid var(--gh-border);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to top left, var(--gh-border), var(--gh-header));
+        }
+        footer p {
+            padding: 0;
+            margin: 0;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <i data-lucide="terminal"></i>RICERCA E TESTING API
+            </a>
+            <ul class="nav-links">
+                <li><a href="#evoluzione">Evoluzione Storica</a></li>
+                <li><a href="#interfaccia">Dashboard Meteo</a></li>
+                <li><a href="#documentazione">Documentazione Tecnica</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HEADER DI PRESENTAZIONE -->
+    <header class="hero">
+        <div class="container-hero">
+            <h1>Integrazione dei Sistemi e Architetture API</h1>
+            <p>L'evoluzione delle interfacce API REST e il loro ruolo; implementazione di interfacce asincrone e documentazione dettagliata del funzionamento.</p>
+        </div>
+        <i data-lucide="rocket" class="hero-rocket-icon" stroke-width="1"></i>
+    </header>
+    <div class="container">
+
+        <!-- SEZIONE 1: EVOLUZIONE STORICA DELLE API -->
+        <section id="evoluzione">
+            <h2>
+                <i data-lucide="git-branch"></i>
+                <span>Sezione 1: L'Evoluzione Storica delle Architetture di Comunicazione</span>
+            </h2>
+            <p>
+Nel panorama attuale dello sviluppo software, la comunicazione tra sistemi differenti rappresenta un elemento essenziale. Applicazioni web, servizi cloud, dispositivi mobili e database devono poter scambiare informazioni in modo rapido, sicuro ed efficiente. Per raggiungere questo obiettivo sono stati sviluppati diversi modelli di comunicazione tra software, evoluti nel tempo per rispondere alle crescenti esigenze di scalabilità, interoperabilità e riduzione dei costi computazionali.
+L’evoluzione delle API (Application Programming Interface) riflette proprio questo processo: si è passati da sistemi fortemente rigidi e centralizzati a modelli più flessibili, leggeri e distribuiti, perfettamente adatti alle moderne infrastrutture cloud-native.            </p>
+
+            <h3><i data-lucide="chevrons-right"></i>Il primo modello di comunicazione tra microservizi: RPC</h3>
+            <p>
+Uno dei primi paradigmi utilizzati è stato quello delle RPC (Remote Procedure Call). Questo approccio permetteva a un programma client di eseguire una funzione presente su un server remoto come se fosse una normale funzione locale.
+Dal punto di vista concettuale, il meccanismo era relativamente semplice: il client inviava una richiesta contenente il nome della funzione da eseguire e i relativi parametri; il server elaborava la richiesta e restituiva il risultato.
+Tuttavia, le RPC presentavano importanti limitazioni strutturali. Client e server dovevano condividere esattamente la stessa definizione delle funzioni e degli argomenti. Di conseguenza, anche una minima modifica alla struttura dei dati o alla firma di un metodo poteva causare incompatibilità tra le due componenti, generando i cosiddetti breaking changes.
+Questo modello creava quindi un forte accoppiamento (tight coupling) tra client e server, riducendo notevolmente la flessibilità e la manutenibilità dei sistemi distribuiti.            </p>
+            
+            <h3><i data-lucide="chevrons-right"></i>Intoduzione di SOAP: standardizzazione WEB services </h3>
+
+            <p>
+Per superare i limiti delle RPC e creare uno standard più affidabile per le applicazioni enterprise, venne introdotto SOAP (Simple Object Access Protocol).
+SOAP definisce un protocollo di comunicazione basato esclusivamente sul formato XML, utilizzato per rappresentare i dati in modo strutturato e indipendente dalla piattaforma hardware o software utilizzata.
+Uno degli elementi fondamentali di SOAP è il WSDL (Web Services Description Language), un documento che descrive formalmente le operazioni disponibili offerte dal servizio, i parametri richiesti e il formato delle risposte. Grazie a questo contratto formale, client e server possono comunicare in modo standardizzato.
+SOAP offriva numerosi vantaggi:
+elevata interoperabilità tra sistemi differenti;
+standard di sicurezza avanzati tramite WS-Security;
+gestione delle transazioni distribuite;
+affidabilità nella trasmissione dei messaggi.
+Nonostante questi aspetti positivi, SOAP presentava anche diversi svantaggi. Il formato XML risultava estremamente verboso, aumentando la quantità di dati trasmessi sulla rete. Inoltre, il parsing dei documenti XML richiedeva maggiore potenza di calcolo rispetto a formati più leggeri.
+Con la diffusione delle applicazioni web moderne e dei servizi ad alto traffico, SOAP iniziò quindi a mostrare limiti significativi in termini di prestazioni, complessità infrastrutturale e velocità di sviluppo.            </p>
+
+            <hr class="section-divider">
+
+            <h3><i data-lucide="chevrons-right"></i> L'Affermazione del Paradigma RESTful</h3>
+            <p>
+                Nel 2000, la tesi di dottorato di Roy Fielding introduce un cambiamento di paradigma radicale: <strong>REST (Representational State Transfer)</strong>. REST abbandona la logica incentrata sulle "funzioni" a favore di un modello totalmente <strong>orientato alle risorse</strong>. Ogni entità logica del sistema viene identificata univocamente da un URI (Uniform Resource Identifier) e manipolata sfruttando i metodi standard già nativamente implementati nel protocollo HTTP (GET, POST, PUT, DELETE).
+            </p>
+            <p>
+                I pilastri su cui si fonda l'efficienza delle API RESTful includono:
+            </p>
+            <ul>
+                <li><strong>Statelessness (Assenza di Stato):</strong> Il server non memorizza alcuna informazione sul contesto del client tra le diverse richieste. Ogni singola transazione deve contenere in sé tutti i metadati e i dati necessari all'elaborazione. Questo vincolo permette una scalabilità orizzontale istantanea all'interno dei cluster cloud, potendo smistare le richieste su nodi differenti senza perdita di persistenza applicativa.</li>
+                <li><strong>Disaccoppiamento Client-Server:</strong> Le due componenti evolvono in maniera del tutto autonoma. Il client non conosce la logica del database sottostante, ma si limita a interpretare le rappresentazioni delle risorse che riceve.</li>
+                <li><strong>Sfruttamento dei Formati Leggeri:</strong> L'adozione del formato JSON (JavaScript Object Notation), nettamente meno verboso di XML, riduce drasticamente l'overhead di rete e velocizza le operazioni di serializzazione e deserializzazione nativa nei browser e nei server moderni.</li>
+            </ul>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parametro di Confronto</th>
+                            <th>SOAP (Paradigma Legacy)</th>
+                            <th>REST (Standard Dominante)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Formato del Payload</strong></td>
+                            <td>Esclusivamente XML (Struttura pesante)</td>
+                            <td>JSON, XML, Plain Text (Predilezione per JSON)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Protocollo di Trasporto</strong></td>
+                            <td>Indipendente (HTTP, SMTP, TCP)</td>
+                            <td>Vincolato a HTTP / HTTPS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gestione dello Stato</strong></td>
+                            <td>Spesso Stateful (gestione complessa nei cluster)</td>
+                            <td>Nativamente Stateless (ideale per Cloud-Native)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Meccanismi di Caching</strong></td>
+                            <td>Non supportati nativamente</td>
+                            <td>Ottimizzati tramite Cache-Control HTTP nativo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                A riprova di questa superiorità architetturale, nel biennio <strong>2024-2025 REST ha consolidato una quota di mercato globale pari all'84-85%</strong>. La spinta decisiva è derivata dall'adozione di massa delle architetture a microservizi e containerizzate (Docker, Kubernetes), dove la velocità di avvio, la leggerezza dei pacchetti scambiati e la natura stateless costituiscono requisiti non negoziabili per lo sviluppo di software moderno.
+            </p>
+        </section>
+
+        <!-- SEZIONE 2: INTERFACCIA GRAFICA METEO -->
+        <section id="interfaccia">
+            <h2>
+                <i data-lucide="cloud-sun"></i>
+                <span>Sezione 2: Dashboard Meteorologica "Instant"</span>
+            </h2>
+            <p>
+                Al fine di testare l'interazione pratica con un'API pubblica di produzione, viene implementato di seguito un modulo interattivo integrato che esegue chiamate di rete in tempo reale verso i server del provider globale <strong>OpenWeatherMap</strong> tramite il protocollo asincrono Fetch.
+            </p>
+            <p>
+                L'interfaccia mantiene lo stile visuale pulito e saturo dei widget <strong>Google Weather</strong>: lo sfondo della scheda e la geometria dell'icona piena variano all'istante all'arrivo dei dati reali.
+            </p>
+
+            <div class="weather-section-container">
+                <div class="weather-card" id="weather-card">
+                    
+                    <!-- Barra di ricerca interna al widget -->
+                    <div class="weather-search">
+                        <input type="text" id="city-input" placeholder="Inserisci città (es. Milano, Tokyo, Paris)..." autocomplete="off">
+                        <button id="search-btn">Cerca</button>
+                    </div>
+
+                    <!-- Contenuto Dinamico Dati -->
+                    <div class="weather-main-layout">
+                        <div>
+                            <div class="city-title" id="txt-city">Milano, IT</div>
+                            <div class="weather-condition" id="txt-condition">In attesa dei dati...</div>
+                            <div class="current-temp" id="txt-temp">--°C</div>
+                        </div>
+                        <div class="google-icon-box" id="icon-box">
+                            <!-- L'icona vettoriale piena viene gestita dal motore JS -->
+                        </div>
+                    </div>
+
+                    <!-- Temperature Minima e Massima -->
+                    <div class="temp-extremes">
+                        <span><strong>Max:</strong> <span id="txt-max">--°C</span></span>
+                        <span><strong>Min:</strong> <span id="txt-min">--°C</span></span>
+                    </div>
+
+                    <!-- Box informativo di stato -->
+                    <div class="weather-info-status" id="status-box">
+                        <i data-lucide="info" style="width:16px; height:16px;"></i>
+                        <span id="status-text">Inizializzazione del client HTTP in corso...</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 3: DOCUMENTAZIONE TECNICA -->
+        <section id="documentazione">
+            <h2>
+                <i data-lucide="file-json"></i>
+                <span>Sezione 3: Documentazione Tecnica e Relazione di Progetto</span>
+            </h2>
+            <p>
+                In questa sezione viene formalizzata l'analisi ingegneristica dell'integrazione eseguita nella dashboard precedente, descrivendo l'aderenza alle best practice RESTful, la struttura dei dati scambiati e i meccanismi di tolleranza ai guasti implementati nel codice.
+            </p>
+
+            <h3><i data-lucide="braces"></i> 1. Struttura e Convenzione degli Endpoint</h3>
+            <p>
+                In conformità con i vincoli architetturali descritti da Fielding, la struttura degli URI utilizzati per invocare il servizio meteo segue la convenzione di utilizzare **sostantivi collettivi plurali** ed evita l'inserimento di estensioni di file (quali <code>.json</code> o <code>.php</code>) per preservare l'indipendenza della tecnologia interna. L'endpoint ufficiale sfruttato dal nostro client per la lettura delle metriche è:
+            </p>
+            <pre>GET http://api.openweathermap.org/data/2.5/weather</pre>
+            <p>
+                La risorsa identificata è <code>weather</code> (le condizioni meteo), nidificata all'interno del modulo di versione <code>2.5</code>. Le opzioni di filtro e i parametri di localizzazione non alterano il percorso dell'URI, ma vengono inviati sotto forma di stringa di query (Query Parameters), garantendo l'idempotenza della richiesta.
+            </p>
+
+            <hr class="section-divider">
+
+            <h3><i data-lucide="braces"></i> 2. Metodo e Payload in Formato JSON</h3>
+            <p>
+                Essendo un'operazione puramente di lettura che non altera lo stato del server, viene impiegato esclusivamente il metodo idoneo <strong>GET</strong>. Poiché lo standard HTTP vieta l'invio di un corpo della richiesta (Body Payload) all'interno delle chiamate GET, i parametri di configurazione vengono serializzati direttamente nell'URL come mostrato di seguito:
+            </p>
+            <pre>GET /data/2.5/weather?q=Milano&units=metric&lang=it&appid=b7134379a957d69cb4529... </pre>
+            
+            <p>
+                Il server, a fronte di una richiesta valida, elabora i dati e restituisce un codice di stato appropriato accoppiato a un payload in formato <strong>JSON</strong> altamente ottimizzato. Eccone una porzione del tracciato reale data-interchange:
+            </p>
+            <pre>{
+  "coord": { "lon": 9.1895, "lat": 45.4643 },
+  "weather": [
+    {
+      "id": 800,
+      "main": "Clear",
+      "description": "cielo sereno",
+      "icon": "01d"
+    }
+  ],
+  "main": {
+    "temp": 22.4,
+    "feels_like": 21.8,
+    "temp_min": 14.5,
+    "temp_max": 25.2,
+    "pressure": 1016,
+    "humidity": 45
+  },
+  "name": "Milano",
+  "sys": { "country": "IT" },
+  "cod": 200
+}</pre>
+
+            <hr class="section-divider">
+
+            <h3><i data-lucide="braces"></i> 3. Gestione degli Stati HTTP ed Error Handling</h3>
+            <p>
+                Un fattore cardine delle moderne architetture orientate ai servizi risiede nell'utilizzo corretto dei **codici di stato HTTP** per comunicare in modo deterministico l'esito delle operazioni. Nel client integrato sono stati mappati e gestiti i seguenti scenari critici:
+            </p>
+            <ul>
+                <li><strong>200 OK:</strong> La risorsa esiste, la transazione ha avuto successo e il client esegue il parsing del JSON aggiornando il DOM.</li>
+                <li><strong>401 Unauthorized:</strong> Si manifesta qualora la chiave di autenticazione (API Key) sia assente, errata o scaduta. L'applicazione rileva lo stato e impedisce il crash dell'interfaccia visualizzando un alert di configurazione.</li>
+                <li><strong>404 Not Found:</strong> Si attiva quando l'utente digita nel campo di ricerca una stringa di testo corrispondente a una località inesistente geograficamente sul server remoto.</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Lombardi Mattia, Bressi Cristian &bull; Testing API, ricerca e documentazione. &copy;&nbsp;<span id="current-date"></span></p>
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT: INTERROGAZIONE REALE TRAMITE FETCH API -->
+    <script>
+        // Icone piene stile Google Weather (Senza contorni vuoti, forme geometriche pure)
+        // Icone vettoriali stile Google Weather con gradienti nativi definiti all'interno dell'SVG
+        const googleGraphics = {
+            sunny: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gradSunny" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ffea00" />
+                                <stop offset="100%" stop-color="#ff6d00" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="12" cy="12" r="10" fill="url(#gradSunny)"></circle>
+                    </svg>`,
+            
+            cloudy: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gradCloudy" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#ffffff" />
+                                <stop offset="100%" stop-color="#b0bec5" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M19.36 10.04A6 6 0 0 0 8 11 4 4 0 0 0 4 15a4 4 0 0 0 4 4h11a5 5 0 0 0 5-5 5 5 0 0 0-4.64-3.96z" fill="url(#gradCloudy)"></path>
+                     </svg>`,
+            
+            rainy: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gradRainCloud" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#90caf9" />
+                                <stop offset="100%" stop-color="#546e7a" />
+                            </linearGradient>
+                            <linearGradient id="gradDrops" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#00b0ff" />
+                                <stop offset="100%" stop-color="#2979ff" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M19.36 10.04A6 6 0 0 0 8 11 4 4 0 0 0 4 15a4 4 0 0 0 4 4h11a5 5 0 0 0 5-5 5 5 0 0 0-4.64-3.96z" fill="url(#gradRainCloud)"></path>
+                        <path d="M8 20l-1 2M12 20l-1 2M16 20l-1 2" stroke="url(#gradDrops)" stroke-width="2.5" stroke-linecap="round"></path>
+                    </svg>`
+        };
+
+        /* ATTENZIONE - CONFIGURAZIONE CHIAVE API:
+           Per impostazione predefinita è inserita la chiave personale "92ecc9d9146771098a3c968d8c67ad72".
+           Se ricevi un errore 401 (Unauthorized) significa che la chiave pubblica è scaduta o ha esaurito la quota oraria di chiamate.
+           In tal caso, sostituiscila qui sotto con la tua API Key di OpenWeatherMap per ripristinare il collegamento in tempo reale.
+        */
+        const API_KEY = "1b4c1be18fbb17aab86bcde3551a279f";
+
+        // Elementi del DOM intercettati
+        const cityInput = document.getElementById('city-input');
+        const searchBtn = document.getElementById('search-btn');
+        const weatherCard = document.getElementById('weather-card');
+        const statusBox = document.getElementById('status-box');
+        const statusText = document.getElementById('status-text');
+
+        const txtCity = document.getElementById('txt-city');
+        const txtCondition = document.getElementById('txt-condition');
+        const txtTemp = document.getElementById('txt-temp');
+        const txtMax = document.getElementById('txt-max');
+        const txtMin = document.getElementById('txt-min');
+        const iconBox = document.getElementById('icon-box');
+
+        // Funzione asincrona che interroga REALMENTE il server remoto OpenWeatherMap
+        async function fetchRealAPIWeather(cityName) {
+            const query = cityName.trim();
+            
+            if (query === "") {
+                updateStatusDisplay("Errore client: Inserisci il nome di una città.", true);
+                return;
+            }
+
+            updateStatusDisplay(`Interrogazione endpoint remoto per "${query}"...`, false);
+
+            try {
+                // Chiamata HTTP reale con passaggio parametri strutturati in Query String
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&units=metric&lang=it&appid=${API_KEY}`;
+                const response = await fetch(url);
+
+                // Analisi e intercettazione dello stato di risposta HTTP
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error("Errore HTTP 404: Città non trovata sui server OpenWeatherMap.");
+                    } else if (response.status === 401) {
+                        throw new Error("Errore HTTP 401: Chiave API non valida o piano tariffario esaurito.");
+                    } else {
+                        throw new Error(`Errore HTTP generico. Stato: ${response.status}`);
+                    }
+                }
+
+                // Parsing del payload JSON effettivo inviato dal server
+                const data = await response.json();
+                
+                // Elaborazione e Rendering grafico
+                renderWeatherUI(data);
+                updateStatusDisplay("Connessione HTTP riuscita. Dati sincronizzati in tempo reale (200 OK).", false);
+
+            } catch (error) {
+                console.error(error);
+                clearWeatherDataDisplay();
+                updateStatusDisplay(error.message, true);
+            }
+        }
+
+        // Rendering visivo e logica dei colori adattivi dinamici in base ai codici meteo effettivi
+        function renderWeatherUI(data) {
+            txtCity.textContent = `${data.name}, ${data.sys.country}`;
+            txtTemp.textContent = `${Math.round(data.main.temp)}°C`;
+            txtCondition.textContent = data.weather[0].description;
+            txtMax.textContent = `${Math.round(data.main.temp_max)}°C`;
+            txtMin.textContent = `${Math.round(data.main.temp_min)}°C`;
+
+            const conditionId = data.weather[0].id;
+
+            // Logica di variazione dello sfondo e dell'icona basata sulla classificazione ufficiale della risorsa
+            if (conditionId === 800) {
+                // Cielo sereno (Clear)
+                weatherCard.style.background = "var(--google-sunny)";
+                iconBox.innerHTML = googleGraphics.sunny;
+            } else if ((conditionId >= 200 && conditionId <= 531) || conditionId === 611 || conditionId === 612) {
+                // Temporale, Pioggerella o Pioggia (Thunderstorm / Drizzle / Rain)
+                weatherCard.style.background = "var(--google-rainy)";
+                iconBox.innerHTML = googleGraphics.rainy;
+            } else {
+                // Nuvoloso, Neve o Nebbia (Clouds / Snow / Atmosphere)
+                weatherCard.style.background = "var(--google-cloudy)";
+                iconBox.innerHTML = googleGraphics.cloudy;
+            }
+        }
+
+        // Pulisce i campi in caso di errore per evitare fraintendimenti visivi
+        function clearWeatherDataDisplay() {
+            txtCity.textContent = "Errore Risorsa";
+            txtCondition.textContent = "Nessun dato disponibile";
+            txtTemp.textContent = "--°C";
+            txtMax.textContent = "--°C";
+            txtMin.textContent = "--°C";
+            iconBox.innerHTML = "";
+            weatherCard.style.background = "var(--google-cloudy)";
+        }
+
+        // Aggiorna la barra informativa interna al widget
+        function updateStatusDisplay(message, isError) {
+            statusText.textContent = message;
+            if (isError) {
+                statusBox.style.backgroundColor = "rgba(248, 81, 73, 0.2)";
+                statusBox.style.borderColor = "#f85149";
+                statusBox.style.color = "#ff7b72";
+            } else {
+                statusBox.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+                statusBox.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                statusBox.style.color = "#ffffff";
+            }
+        }
+
+        // Event Listeners per l'interazione utente
+        searchBtn.addEventListener('click', () => fetchRealAPIWeather(cityInput.value));
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchRealAPIWeather(cityInput.value);
+        });
+
+        // Esecuzione del bootstrap iniziale al caricamento della pagina (Default: Milano)
+        fetchRealAPIWeather("Milano");
+
+        // Inizializzazione icone Lucide statiche generali del documento
+        lucide.createIcons();
+
+        //scrittura data attuale nel footer
+        let currentYear = new Date().getFullYear();
+        document.getElementById("current-date").innerHTML = currentYear;
+    </script>
+</body>
+</html>
