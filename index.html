@@ -509,7 +509,6 @@ elevata interoperabilità tra sistemi differenti;
 standard di sicurezza avanzati tramite WS-Security;
 gestione delle transazioni distribuite;
 affidabilità nella trasmissione dei messaggi.
-
 Nonostante questi aspetti positivi, SOAP presentava anche diversi svantaggi. Il formato XML risultava estremamente verboso, aumentando la quantità di dati trasmessi sulla rete. Inoltre, il parsing dei documenti XML richiedeva maggiore potenza di calcolo rispetto a formati più leggeri.
 Con la diffusione delle applicazioni web moderne e dei servizi ad alto traffico, SOAP iniziò quindi a mostrare limiti significativi in termini di prestazioni, complessità infrastrutturale e velocità di sviluppo.            </p>
 
@@ -624,17 +623,14 @@ Con la diffusione delle applicazioni web moderne e dei servizi ad alto traffico,
                 <span>Sezione 3: Documentazione Tecnica e Relazione di Progetto</span>
             </h2>
             <p>
-                In questa sezione viene formalizzata l'analisi ingegneristica dell'integrazione eseguita nella dashboard precedente, descrivendo l'aderenza alle best practice RESTful, la struttura dei dati scambiati e i meccanismi di tolleranza ai guasti implementati nel codice.
-            </p>
+In questa sezione viene presentata l'analisi tecnica dell'integrazione realizzata nella dashboard precedente. Verranno descritti il rispetto dei principi RESTful, la struttura dei dati scambiati tra i sistemi e le soluzioni adottate per gestire eventuali errori e garantire il corretto funzionamento dell'applicazione.            </p>
 
             <h3><i data-lucide="braces"></i> 1. Struttura e Convenzione degli Endpoint</h3>
             <p>
-                In conformità con i vincoli architetturali descritti da Fielding, la struttura degli URI utilizzati per invocare il servizio meteo segue la convenzione di utilizzare **sostantivi collettivi plurali** ed evita l'inserimento di estensioni di file (quali <code>.json</code> o <code>.php</code>) per preservare l'indipendenza della tecnologia interna. L'endpoint ufficiale sfruttato dal nostro client per la lettura delle metriche è:
-            </p>
+Seguendo i principi dell'architettura REST descritti da Fielding, gli URI utilizzati per accedere al servizio meteo sono costruiti utilizzando nomi di risorse al plurale ed evitando l'uso di estensioni di file come <code>.json</code> o <code>.php</code>. Questa scelta rende l'API indipendente dalla tecnologia utilizzata internamente. L'endpoint utilizzato dal client per ottenere i dati meteorologici è il seguente:            </p>
             <pre>GET http://api.openweathermap.org/data/2.5/weather</pre>
             <p>
-                La risorsa identificata è <code>weather</code> (le condizioni meteo), nidificata all'interno del modulo di versione <code>2.5</code>. Le opzioni di filtro e i parametri di localizzazione non alterano il percorso dell'URI, ma vengono inviati sotto forma di stringa di query (Query Parameters), garantendo l'idempotenza della richiesta.
-            </p>
+La risorsa richiesta è <code>weather</code>, che rappresenta i dati meteorologici ed è inclusa nella versione <code>2.5</code> dell'API. I parametri relativi alla posizione geografica e alle opzioni di ricerca non modificano il percorso principale dell'URI, ma vengono inviati tramite la query string. Questo approccio mantiene la struttura dell'endpoint chiara e permette di effettuare richieste ripetute senza modificare i dati presenti sul server.            </p>
 
             <hr class="section-divider">
 
@@ -674,7 +670,7 @@ Con la diffusione delle applicazioni web moderne e dei servizi ad alto traffico,
 
             <h3><i data-lucide="braces"></i> 3. Gestione degli Stati HTTP ed Error Handling</h3>
             <p>
-                Un fattore cardine delle moderne architetture orientate ai servizi risiede nell'utilizzo corretto dei **codici di stato HTTP** per comunicare in modo deterministico l'esito delle operazioni. Nel client integrato sono stati mappati e gestiti i seguenti scenari critici:
+                Un fattore cardine delle moderne architetture orientate ai servizi risiede nell'utilizzo corretto dei <strong>codici di stato HTTP </strong>per comunicare in modo deterministico l'esito delle operazioni. Nel client integrato sono stati mappati e gestiti i seguenti scenari critici:
             </p>
             <ul>
                 <li><strong>200 OK:</strong> La risorsa esiste, la transazione ha avuto successo e il client esegue il parsing del JSON aggiornando il DOM.</li>
